@@ -1,19 +1,9 @@
 version: '3.4'
 
 services:
-  web:
-    image: nginx
-    volumes:
-       - ./config/proxy:/etc/nginx/conf.d
-       - ./config/proxy/web.conf:/etc/nginx/nginx.conf:ro
-    links:
-      - identifier:identifier
-    labels:
-      - "logging=true"
-    restart: always
+  identifier:    
     ports:
       - "80:80"
-  identifier:
     restart: "no"
   dispatcher:
     restart: "no"
@@ -29,39 +19,31 @@ services:
     restart: "no"
   cache:
     restart: "no"
-  uri-info:
-    restart: "no"
-  resource-labels-cache:
-    restart: "no"
-  resource-labels:
-    restart: "no"
   kalliope-api:
+    profiles:
+      - disable-in-dev
     restart: "no"
   deltanotifier:
+    profiles:
+      - disable-in-dev
+    restart: "no"
+  sink:
+    profiles:
+      - disable-in-dev
+    restart: "no"
+  login:
+    profiles:
+      - disable-in-dev
+    restart: "no"
+  web:
+    profiles:
+      - disable-in-dev
+    restart: "no"
+  frontend:
+    profiles:
+      - disable-in-dev
     restart: "no"
   mocklogin:
     image: lblod/mock-login-service:latest
     links:
       - db:database
-  sink:
-    restart: "no"
-  login:
-    restart: "no"
-  frontend:
-    image: lblod/frontend-contact-hub:latest
-    labels:
-      - "logging=true"
-    restart: always
-    environment: 
-     EMBER_OAUTH_API_REDIRECT_URL: "https://organisaties.abb.lblod.info/authorization/callback"
-     EMBER_OAUTH_API_KEY: "677af572-2e2f-4e61-ad38-036723bb314c"
-     EMBER_OAUTH_API_BASE_URL: "https://authenticatie-ti.vlaanderen.be/op/v1/auth"
-     EMBER_OAUTH_API_LOGOUT_URL: "https://authenticatie-ti.vlaanderen.be/op/v1/logout"
-     EMBER_OAUTH_API_SCOPE: "openid vo profile abb_organisatieportaal"
-    restart: always
-  proxy:
-    image: nginx:1.13
-    volumes:
-      - ./config/proxy-https:/etc/nginx/conf.d
-    ports:
-      - "443:443"
