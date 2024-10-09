@@ -69,6 +69,7 @@ WHERE {
 VALUES ?org { #{sparql_escape_uri(unit)}}
 ?org ?p ?o.
 VALUES ?p {
+ rdf:type
  org:classification
  besluit:classificatie
  skos:prefLabel
@@ -169,7 +170,7 @@ if options.size > 0
     repo = export_admin_unit(unit[:org])
     path = File.join(output_dir, "#{sanitize_unix_path(unit[:name].to_s)}.ttl")
     File.open(path, 'w') do |file|
-      repo.dump(:ttl)
+      file.write repo.dump(:ttl)
     end
     prompt.say("Exported #{repo.size} statements to #{path}")
   end
