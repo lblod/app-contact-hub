@@ -89,17 +89,19 @@ PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
 CONSTRUCT {
 ?id ?p ?o.
-?gestructureerdeIdentificator ?gp ?go.
+?id skos:notation ?localId.
+?id <http://www.w3.org/ns/adms#schemaAgency> ?source.
 }
 WHERE {
 VALUES ?org { #{sparql_escape_uri(unit)}}
 ?org   <http://www.w3.org/ns/adms#identifier> ?id.
 ?id ?p ?o.
-OPTIONAL {
+FILTER (?p NOT IN(<http://www.w3.org/2004/02/skos/core#notation>, <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator>))
+?id <http://www.w3.org/2004/02/skos/core#notation> ?source.
+FILTER(?source != "SharePoint identificator")
 ?id <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?gestructureerdeIdentificator.
-?gestructureerdeIdentificator ?gp ?go.
+?gestructureerdeIdentificator <https://data.vlaanderen.be/ns/generiek#lokaleIdentificator> ?localId
 }
-
 EOF
   repository << Mu::AuthSudo.query(query)
   query = <<~EOF
