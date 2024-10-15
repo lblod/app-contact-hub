@@ -74,8 +74,6 @@ VALUES ?p {
  org:classification
  besluit:classificatie
  skos:prefLabel
- besluit:werkingsgebied
- <http://www.w3.org/ns/adms#identifier>
  <http://mu.semte.ch/vocabularies/core/uuid>
  <http://www.w3.org/ns/regorg#orgStatus>
 }
@@ -156,7 +154,10 @@ VALUES ?post { org:hasPost <http://data.lblod.info/vocabularies/leidinggevenden/
 ?bestuursorgaanIntijd ?post ?mandaat.
 ?mandaat ?p ?o.
 ?mandaat org:role ?role.
-?role ?roleP ?roleO.
+OPTIONAL {
+  ?role ?roleP ?roleO.
+  FILTER(!STRSTARTS(STR(?role), "http://data.vlaanderen.be"))
+}
 }
 EOF
   repository << Mu::AuthSudo.query(query)
