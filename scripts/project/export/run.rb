@@ -197,7 +197,7 @@ def convert_date_to_datetime(date_literal)
   begin
     date = Date.parse(date_literal.to_s)
     datetime = DateTime.new(date.year, date.month, date.day)
-    RDF::Literal.new(datetime.to_s, datatype: RDF::XSD.dateTime)
+    RDF::Literal.new(datetime.strftime("%Y-%m-%dT%T"), datatype: RDF::XSD.dateTime)
   rescue ArgumentError => e
     puts "Invalid date format for #{date_literal}: #{e.message}"
     nil
