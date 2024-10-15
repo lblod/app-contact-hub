@@ -7,6 +7,7 @@ require 'date'
 require 'rdf/vocab'
 require 'tty-prompt'
 require 'rdf/turtle'
+require 'rdf/reasoner'
 
 $stdout.sync = true
 ENV['LOG_SPARQL_ALL']='false'
@@ -81,7 +82,26 @@ VALUES ?p {
 }
 EOF
   repository << Mu::AuthSudo.query(query)
+  query = <<~EOF
+PREFIX org: <http://www.w3.org/ns/org#>
+PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
+PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
+CONSTRUCT {
+?id ?p ?o.
+?gestructureerdeIdentificator ?gp ?go.
+}
+WHERE {
+VALUES ?org { #{sparql_escape_uri(unit)}}
+?org   <http://www.w3.org/ns/adms#identifier> ?id.
+?id ?p ?o.
+OPTIONAL {
+?id <https://data.vlaanderen.be/ns/generiek#gestructureerdeIdentificator> ?gestructureerdeIdentificator.
+?gestructureerdeIdentificator ?gp ?go.
+}
 
+EOF
+  repository << Mu::AuthSudo.query(query)
   query = <<~EOF
 PREFIX org: <http://www.w3.org/ns/org#>
 PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
@@ -153,6 +173,56 @@ def sanitize_unix_path(path)
   sanitized_path
 end
 
+
+def enrich_graph(data)
+  RDF::Reasoner.apply(:owl,:rdfs)
+  graph = RDF::Graph.load("./enrichment.owl")
+  graph << clean_up_dates(data)
+  graph.entail!(:subClassOf)
+  graph.entail!(:equivalentProperty)
+  graph
+end
+
+DATE_PREDICATES=[
+  RDF::URI("http://data.vlaanderen.be/ns/mandaat#bindingStart"),
+  RDF::URI("http://data.vlaanderen.be/ns/mandaat#bindingEinde"),
+  RDF::URI("https://data.vlaanderen.be/ns/generiek#bindingStart"),
+  RDF::URI("https://data.vlaanderen.be/ns/generiek#bindingEinde")
+]
+
+def convert_date_to_datetime(date_literal)
+  begin
+    date = Date.parse(date_literal.to_s)
+    datetime = DateTime.new(date.year, date.month, date.day)
+    RDF::Literal.new(datetime.to_s, datatype: RDF::XSD.dateTime)
+  rescue ArgumentError => e
+    puts "Invalid date format for #{date_literal}: #{e.message}"
+    nil
+  end
+end
+
+def clean_up_dates(data)
+  clean_data = RDF::Graph.new
+  data.each_statement do |statement|
+    if DATE_PREDICATES.include?(statement.predicate)
+      obj = statement.object
+      if obj.is_a?(RDF::Literal) && obj.datatype == RDF::XSD.date
+        new_object = convert_date_to_datetime(obj)
+        if new_object
+          clean_data << [statement.subject, statement.predicate, new_object]  # Add the new statement
+        end
+      elsif obj.is_a?(RDF::Literal) && obj.datatype == RDF::XSD.dateTime
+        clean_data << statement
+      else
+        puts "unexpected value #{obj.inspect}for statement:\n #{statement.inspect}"
+      end
+    else
+      clean_data << statement
+    end
+  end
+  clean_data
+end
+
 prompt = TTY::Prompt.new
 prompt.say("\n\n")
 prompt.say("This script will help you export administrative units and their respective bodies")
@@ -168,7 +238,8 @@ if options.size > 0
   ensure_dir(output_dir)
   admin_units.each do |unit|
     repo = export_admin_unit(unit[:org])
-    path = File.join(output_dir, "#{sanitize_unix_path(unit[:name].to_s)}.ttl")
+    repo = enrich_graph(repo)
+    path = File.join(output_dir, "#{SecureRandom.uuid}-#{sanitize_unix_path(unit[:name].to_s)}.ttl")
     File.open(path, 'w') do |file|
       file.write repo.dump(:ttl)
     end
