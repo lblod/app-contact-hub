@@ -76,6 +76,7 @@ VALUES ?p {
  skos:prefLabel
  <http://mu.semte.ch/vocabularies/core/uuid>
  <http://www.w3.org/ns/regorg#orgStatus>
+ <http://data.lblod.info/vocabularies/erediensten/betrokkenBestuur>
 }
 }
 EOF
