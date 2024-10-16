@@ -242,7 +242,8 @@ if options.size > 0
   admin_units.each do |unit|
     repo = export_admin_unit(unit[:org])
     repo = enrich_graph(repo)
-    path = File.join(output_dir, "#{SecureRandom.uuid}-#{sanitize_unix_path(unit[:name].to_s)}.ttl")
+    timestamp=`date +%Y%0m%0d%0H%0M%0S`
+    path = File.join(output_dir, "#{timestamp}-#{SecureRandom.uuid}-#{sanitize_unix_path(unit[:name].to_s)}.ttl")
     File.open(path, 'w') do |file|
       file.write repo.dump(:ttl)
     end
