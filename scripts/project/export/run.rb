@@ -243,8 +243,102 @@ if options.size > 0
   admin_units.each do |unit|
     repo = export_admin_unit(unit[:org])
     repo = enrich_graph(repo)
-    timestamp=`date +%Y%0m%0d%0H%0M%0S`
-    path = File.join(output_dir, "#{timestamp}-#{SecureRandom.uuid}-#{sanitize_unix_path(unit[:name].to_s)}.ttl")
+    file_name = sanitize_unix_path(unit[:name].to_s)
+    timestamp=`date +%Y%0m%0d%0H%0M%0S`.strip.to_i
+    path = File.join(output_dir, "#{timestamp}-remove-data-#{file_name}-bestuurseenheid.sparql")
+    File.open(path, 'w') do |file|
+      file.write <<EOF
+PREFIX besluit:  <http://data.vlaanderen.be/ns/besluit#>
+PREFIX mandaat:  <http://data.vlaanderen.be/ns/mandaat#>
+PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
+PREFIX org:      <http://www.w3.org/ns/org#>
+PREFIX prov:     <http://www.w3.org/ns/prov#>
+DELETE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+ ?id ?p ?o.
+}
+} WHERE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+<#{unit[:org]}> <http://www.w3.org/ns/adms#identifier> ?id.
+ ?id ?p ?o.
+}
+};
+DELETE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+ ?gebied ?p ?o.
+}
+} WHERE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+<#{unit[:org]}> besluit:werkingsgebied ?gebied.
+ ?gebied ?p ?o.
+}
+};
+DELETE WHERE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+<#{unit[:org]}> ?p ?o
+}
+};
+EOF
+    end
+    path = File.join(output_dir, "#{timestamp}-remove-data-#{file_name}-bestuursorganen.sparql")
+    File.open(path, 'w') do |file|
+      file.write <<EOF
+PREFIX besluit:  <http://data.vlaanderen.be/ns/besluit#>
+PREFIX mandaat:  <http://data.vlaanderen.be/ns/mandaat#>
+PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
+PREFIX org:      <http://www.w3.org/ns/org#>
+PREFIX prov:     <http://www.w3.org/ns/prov#>
+DELETE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?mandaat ?p ?o
+}
+} WHERE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?bestuursorgaan besluit:bestuurt <#{unit[:org]}> .
+?bestuursorgaanIntijd mandaat:isTijdspecialisatieVan ?bestuursorgaan.
+VALUES ?post { org:hasPost <http://data.lblod.info/vocabularies/leidinggevenden/heeftBestuursfunctie>}
+?bestuursorgaanIntijd ?post ?mandaat.
+?mandaat ?p ?o.
+}
+};
+DELETE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?mandaat ?p ?o
+}
+} WHERE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?bestuursorgaan besluit:bestuurt <#{unit[:org]}> .
+?bestuursorgaanIntijd mandaat:isTijdspecialisatieVan ?bestuursorgaan.
+VALUES ?post { org:hasPost <http://data.lblod.info/vocabularies/leidinggevenden/heeftBestuursfunctie>}
+?bestuursorgaanIntijd ?post ?mandaat.
+?mandaat ?p ?o.
+}
+};
+DELETE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?bestuursorgaanIntijd ?p ?o
+}
+} WHERE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?bestuursorgaan besluit:bestuurt <#{unit[:org]}> .
+?bestuursorgaanIntijd mandaat:isTijdspecialisatieVan ?bestuursorgaan.
+VALUES ?post { org:hasPost <http://data.lblod.info/vocabularies/leidinggevenden/heeftBestuursfunctie>}
+?bestuursorgaanIntijd ?p ?o
+}
+};
+DELETE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?bestuursorgaan ?p ?o
+}
+} WHERE {
+ GRAPH <http://mu.semte.ch/graphs/public> {
+?bestuursorgaan besluit:bestuurt <#{unit[:org]}>; ?p ?o
+}
+}
+EOF
+    end
+    timestamp+=1
+    path = File.join(output_dir, "#{timestamp}-#{SecureRandom.uuid}-#{file_name}.ttl")
     File.open(path, 'w') do |file|
       file.write repo.dump(:ttl)
     end
