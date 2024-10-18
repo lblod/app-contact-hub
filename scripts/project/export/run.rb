@@ -87,6 +87,7 @@ PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
 PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
 CONSTRUCT {
+?org   <http://www.w3.org/ns/adms#identifier> ?id.
 ?id ?p ?o.
 ?id skos:notation ?localId.
 ?id <http://www.w3.org/ns/adms#schemaAgency> ?source.
@@ -109,6 +110,7 @@ PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
 PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
 CONSTRUCT {
+?org  besluit:werkingsgebied ?gebied.
 ?gebied ?p ?o.
 }
 WHERE {
@@ -124,15 +126,21 @@ PREFIX org: <http://www.w3.org/ns/org#>
 PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>
 PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 PREFIX generiek: <https://data.vlaanderen.be/ns/generiek#>
+PREFIX mandaat: <https://data.vlaanderen.be/ns/mandaat#>
 CONSTRUCT {
 ?bestuursorgaan ?bp ?bo.
+?bestuursorgaanIntijd generiek:isTijdspecialisatieVan ?bestuursorgaan.
 ?bestuursorgaanIntijd ?bop ?boo.
 }
 WHERE {
 VALUES ?org { #{sparql_escape_uri(unit)}}
 ?bestuursorgaan besluit:bestuurt ?org.
 ?bestuursorgaan ?bp ?bo.
-?bestuursorgaanIntijd generiek:isTijdspecialisatieVan ?bestuursorgaan.
+values ?tijdspecialisatie {
+generiek:isTijdspecialisatieVan
+mandaat:isTijdspecialisatieVan
+}
+?bestuursorgaanIntijd ?tijdspecialisatie ?bestuursorgaan.
 ?bestuursorgaanIntijd ?bop ?boo.
 }
 
