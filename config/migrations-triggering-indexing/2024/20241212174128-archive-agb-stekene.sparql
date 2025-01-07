@@ -1,15 +1,119 @@
+# Remove AGB Stekene's data
+
+## Remove bestuursorganen and bestuursorganen in tijd
+
+### Bestuursorganen
+
 DELETE {
   GRAPH ?g {
-    <http://data.lblod.info/id/bestuurseenheden/8d6609b4-1a20-46b8-97ed-150c6d53acd6> <http://www.w3.org/ns/regorg#orgStatus> ?orgStatus .
-  }
-}
-INSERT {
-  GRAPH ?g {
-    <http://data.lblod.info/id/bestuurseenheden/8d6609b4-1a20-46b8-97ed-150c6d53acd6> <http://www.w3.org/ns/regorg#orgStatus> <http://lblod.data.gift/concepts/d02c4e12bf88d2fdf5123b07f29c9311> .
+    ?bestuursorganen ?bestuursorganenP ?bestuursorganenO .
   }
 }
 WHERE {
+  VALUES ?bestuursorganen {
+    <http://data.lblod.info/id/bestuursorganen/24d8e602a8ddbe0adf3dea8c40277706>
+    <http://data.lblod.info/id/bestuursorganen/dad1789d9b9f8f6cb3c81cc2ca88154f>
+    <http://data.lblod.info/id/bestuursorganen/b90d16f2c8043bc20b88da232c0389fc>
+    <http://data.lblod.info/id/bestuursorganen/2f27a688e1728c1906a4bbd8670d7810>
+  }
+
   GRAPH ?g {
-    <http://data.lblod.info/id/bestuurseenheden/8d6609b4-1a20-46b8-97ed-150c6d53acd6> <http://www.w3.org/ns/regorg#orgStatus> ?orgStatus .
+    ?bestuursorganen ?bestuursorganenP ?bestuursorganenO .
+  }
+}
+
+;
+
+### Bestuursorganen in Tijd
+
+DELETE {
+  GRAPH ?g {
+    ?bestuursorganenInTijd ?bestuursorganenInTijdP ?bestuursorganenInTijdO .
+  }
+}
+WHERE {
+  VALUES ?bestuursorganenInTijd {
+    <http://data.lblod.info/id/bestuursorganen/c5bb7bca7363109b94b58b1aef6ed59c>
+    <http://data.lblod.info/id/bestuursorganen/8d43a29c6ed4a8af0cd43d4aba2c7014>
+    <http://data.lblod.info/id/bestuursorganen/f54979f47464bae1cc001788aedb8b86>
+    <http://data.lblod.info/id/bestuursorganen/c9a7d9130e1dd8f26ddb8c96fdd94c64>
+  }
+
+  GRAPH ?g {
+    ?bestuursorganenInTijd ?bestuursorganenInTijdP ?bestuursorganenInTijdO .
+  }
+}
+
+;
+
+## Remove Identifiers
+
+DELETE {
+  GRAPH ?g {
+    ?identifier ?identifierP ?identifierO .
+  }
+}
+WHERE {
+  VALUES ?identifier {
+    <http://data.lblod.info/id/identificatoren/99554be7-29d2-403a-a7d5-bda842b4bd86>
+    <http://data.lblod.info/id/identificatoren/19847e1b-a2bf-48a1-872e-baf8d4efaa12>
+    <http://data.lblod.info/id/identificatoren/b2123d27-b6bc-4e70-b594-27d35c696713>
+  }
+
+  GRAPH ?g {
+    ?identifier ?identifierP ?identifierO .
+  }
+}
+
+;
+
+DELETE {
+  GRAPH ?g {
+    ?structuredIdentifier ?structuredIdentifierP ?structuredIdentifierO .
+  }
+}
+WHERE {
+  VALUES ?structuredIdentifier {
+    <http://data.lblod.info/id/gestructureerdeIdentificatoren/920f98a2-1785-4de1-81ed-5859c224dcb8>
+    <http://data.lblod.info/id/gestructureerdeIdentificatoren/5e1082d8-7751-4bed-a53f-457b347f7f28>
+    <http://data.lblod.info/id/gestructureerdeIdentificatoren/2e978403-d3ef-40ab-a9f9-3a4ae6a35609>
+  }
+
+  GRAPH ?g {
+    ?structuredIdentifier ?structuredIdentifierP ?structuredIdentifierO .
+  }
+}
+
+;
+
+## Remove Reverse Property
+
+DELETE {
+  GRAPH ?g {
+    ?s <http://www.w3.org/ns/org#hasSubOrganization> ?organization .
+  }
+}
+WHERE {
+  BIND(<http://data.lblod.info/id/bestuurseenheden/8d6609b4-1a20-46b8-97ed-150c6d53acd6> AS ?organization)
+
+  GRAPH ?g {
+    ?s <http://www.w3.org/ns/org#hasSubOrganization> ?organization .
+  }
+}
+
+;
+
+## Remove Forward Properties
+
+DELETE {
+  GRAPH ?g {
+    ?organization ?organizationP ?organizationO .
+  }
+}
+WHERE {
+  BIND(<http://data.lblod.info/id/bestuurseenheden/8d6609b4-1a20-46b8-97ed-150c6d53acd6> AS ?organization)
+
+  GRAPH ?g {
+    ?organization ?organizationP ?organizationO .
   }
 }
