@@ -1,9 +1,3 @@
-# Remove AGB Stekene's data
-
-## Remove bestuursorganen and bestuursorganen in tijd
-
-### Bestuursorganen
-
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
     ?bestuursorganen ?bestuursorganenP ?bestuursorganenO .
@@ -24,8 +18,6 @@ WHERE {
 
 ;
 
-### Bestuursorganen in Tijd
-
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
     ?bestuursorganenInTijd ?bestuursorganenInTijdP ?bestuursorganenInTijdO .
@@ -45,8 +37,6 @@ WHERE {
 }
 
 ;
-
-## Remove Identifiers
 
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
@@ -86,8 +76,6 @@ WHERE {
 
 ;
 
-## Remove Site and its related URIs
-
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
     ?site ?siteP ?siteO .
@@ -105,8 +93,6 @@ WHERE {
 
 ;
 
-### Remove Addresses
-
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
     ?address ?addressP ?addressO .
@@ -123,8 +109,6 @@ WHERE {
 }
 
 ;
-
-### Remove Contact Points
 
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
@@ -144,11 +128,9 @@ WHERE {
 
 ;
 
-## Remove Reverse Properties
-
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
-    ?s <http://www.w3.org/ns/org#hasSubOrganization> ?organization .
+    ?parentOrganization <http://www.w3.org/ns/org#hasSubOrganization> ?organization .
   }
 }
 WHERE {
@@ -156,35 +138,27 @@ WHERE {
   BIND(<http://data.lblod.info/id/bestuurseenheden/6025a5d1ca2262a784f002edd8ce9ca9073ae3d5ebc6b6b5531f05a29e9250af> AS ?parentOrganization)
 
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
-    ?parentOrganization <http://www.w3.org/ns/org#hasSubOrganization> ?organization ;
-      <http://mu.semte.ch/vocabularies/ext/isFounderOfOrganization> ?organization .
+    ?parentOrganization <http://www.w3.org/ns/org#hasSubOrganization> ?organization .
   }
 }
 
 ;
-
-### Remove Membership Relationship
 
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
-    ?membership ?membershipP ?membershipO .
+    ?parentOrganization <http://mu.semte.ch/vocabularies/ext/isFounderOfOrganization> ?organization .
   }
 }
 WHERE {
-  VALUES ?membership {
-    <http://data.lblod.info/id/lidmaatschap/1c2608c9cde34c3091442af5df63aa7cb27e7022>
-    <http://data.lblod.info/id/lidmaatschap/958418b8cd7d5c5668ec4629d0846cba33eaf761>
-    <http://data.lblod.info/id/lidmaatschap/92316facb819628fd41ed8dd18ba9ec902383e54>
-  }
+  BIND(<http://data.lblod.info/id/bestuurseenheden/8d6609b4-1a20-46b8-97ed-150c6d53acd6> AS ?organization)
+  BIND(<http://data.lblod.info/id/bestuurseenheden/6025a5d1ca2262a784f002edd8ce9ca9073ae3d5ebc6b6b5531f05a29e9250af> AS ?parentOrganization)
 
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
-    ?membership ?membershipP ?membershipO .
+    ?parentOrganization <http://mu.semte.ch/vocabularies/ext/isFounderOfOrganization> ?organization .
   }
 }
 
 ;
-
-## Remove Forward Properties
 
 DELETE {
   GRAPH <http://mu.semte.ch/graphs/administrative-unit> {
